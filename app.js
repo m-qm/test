@@ -1,11 +1,14 @@
 import express from 'express';
 import db from './db/db';
 import bodyParser from 'body-parser';
+var errorHandler = require('errorhandler');
+
 // Set up the express app
 const app = express();
 const expressip = require('express-ip');
 const requestIp = require('request-ip');
 const request = require('request');
+const morgan = require('morgan');
 
 const PORT = process.env.PORT || 5000;
 const expressLayouts = require('express-ejs-layouts');
@@ -55,13 +58,15 @@ app.get('/', function (req, res) {
   res.render('index', {weather: null, error: null});
 })
 
-//Post city
+//Post city & get weather
 
 app.post('/', function (req, res) {
   let city = req.body.city;
-  let url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
-  request(url, function (err, response, body) {
-    if(err){
+  let country = req.body.country;
+
+  let url = `http://api.openweathermap.org/data/2.5/weather?q=${city},${country}&units=metric&appid=${apiKey}`
+  request(url, function (error, response, body) {
+    if(error){
       res.render('index', {weather: null, error: 'Error, please try again'});
     } else {
       let weather_json = JSON.parse(body);
@@ -70,7 +75,7 @@ app.post('/', function (req, res) {
         res.render('index', {weather_json: null, error: 'Error, please try again'});
       } else {
         var weather = {
-          city : city,
+          city : weather_json.name,
           temperature : parseInt(weather_json.main.temp),
           description: weather_json.weather[0].description,
           icon: "http://openweathermap.org/img/w/" + weather_json.weather[0].icon + ".png"
@@ -90,6 +95,7 @@ app.get('/ipinfo', (req, res) => {
   const ipInfo = req.ipInfo;
   var message = `Hey, you are browsing in ${ipInfo.city}, ${ipInfo.country}`;
   // console.log(ipInfo);
+  res.render('ipinfo', {ipInfo, error: null});
   res.send(message);
 })
 
@@ -102,6 +108,8 @@ app.get('/api/v1/users', (req, res) => {
     users: db
   })
 });
+
+// post user
 
 app.post('/api/v1/users', (req, res) => {
   if(!req.body.title) {
@@ -129,6 +137,8 @@ app.post('/api/v1/users', (req, res) => {
  })
 });
 
+// get user by id
+
 app.get('/api/v1/users/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   db.map((users) => {
@@ -145,6 +155,8 @@ app.get('/api/v1/users/:id', (req, res) => {
     message: 'user does not exist',
   });
 });
+
+// delete user by id
 
 app.delete('/api/v1/users/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
@@ -164,6 +176,8 @@ app.delete('/api/v1/users/:id', (req, res) => {
       message: 'user not found',
     });
 });
+
+// update user
 
 app.put('/api/v1/users/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
@@ -212,7 +226,7 @@ app.put('/api/v1/users/:id', (req, res) => {
 });
 
 
-app.listen(app.get('PORT'), () =>  {
+app.listen(process.env.PORT || app.get('PORT'), () =>  {
   console.log('App running on http://localhost:' +
         app.get('PORT') + '; press Ctrl-C to terminate.');
 });

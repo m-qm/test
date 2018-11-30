@@ -1,6 +1,6 @@
 
 body {
-  width: 800px;
+  width: auto;
   margin: 0 auto;
   font-family: 'Open Sans', sans-serif;
 }
@@ -54,7 +54,7 @@ fieldset {
   background-color: transparent;
   border:2px solid #ddd;
   padding:10px 30px;
-  width: 100%;
+  max-width: 30px;
   min-width: 350px;
   -webkit-transition: all 0.1s ease-in-out;
   -moz-transition: all 0.1s ease-in-out;
@@ -73,10 +73,7 @@ p {
   background-color: #ffffff;
   color: #555555;
 }
-.container-fluid {
-  padding-top: 70px;
-  padding-bottom: 70px;
-}
+
 .navbar {
   padding-top: 15px;
   padding-bottom: 15px;
