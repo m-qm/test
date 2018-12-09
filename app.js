@@ -25,8 +25,11 @@ app.set("PORT", PORT);
 
 const ipMiddleware = function(req, res, next) {
     const clientIp = requestIp.getClientIp(req); 
-    next();
+    var ip = req.headers['x-forwarded-for'].split(',')[0];
+
     console.log(clientIp);
+    console.log(ip);
+    next();
 };
 
 // Mongoose connect
